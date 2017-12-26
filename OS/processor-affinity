@@ -1,0 +1,4 @@
+Processor affinity - Wikipedia](https://en.wikipedia.org/wiki/Processor_affinity)
+
+On Linux, the CPU affinity of a process can be altered with the taskset program and the sched_setaffinity system call.
+The affinity of a thread can be altered with one of the library functions: pthread_setaffinity_np or pthread_attr_setaffinity_np.
