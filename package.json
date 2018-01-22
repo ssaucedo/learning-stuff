@@ -1,0 +1,28 @@
+{
+  "name": "learning-stuff",
+  "version": "1.0.0",
+  "description": "Container of CS things",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssaucedo/learning-stuff.git"
+  },
+  "keywords": [
+    "learning",
+    "javascript",
+    "CS"
+  ],
+  "author": "Santiago Saucedo <santiago.g.saucedo@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ssaucedo/learning-stuff/issues"
+  },
+  "homepage": "https://github.com/ssaucedo/learning-stuff#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  }
+}
