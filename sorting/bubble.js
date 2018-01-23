@@ -13,6 +13,6 @@ const bubbleSort = (arr) => {
   return arr
 }
 
-
+var a = [1,3,2,4,5,8,7,9,6,100, -1, 0]
 c(bubbleSort(a))
 

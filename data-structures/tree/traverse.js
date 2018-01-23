@@ -73,12 +73,11 @@ class BinaryTree {
                 s1.push(tmp.right);
         }
  
-        while (s2.length !== 0){
+        while (s2.length !== 0) {
           let tmp = s2.pop();
           console.log(tmp.key)
         }
     }
-  
 }
 
 class Node {
@@ -103,5 +102,3 @@ node2.right = node5
 
 const bt = new BinaryTree(root)
 bt.postOrder(root)
-
-```
