@@ -8,16 +8,20 @@
  */
 
 function CacheMemory (initTime) {
-  this.initTime = initTime || new Date().getMilliseconds()
+  this.initTime = setInitTime(initTime)
   this.memory = {}
 
   function setInitTime(initTime) {
     if (initTime) {
-      this.initTime = initTime
+      return initTime
     } else {
-      const date = new Date()
-      this.initTime = date.getSeconds() * 1000 + date.getMilliseconds()
+      return getTime()
     }
+  }
+
+  function getTime() {
+    let date = new Date()
+    return date.getHours() * 60 * 60 * 1000 + date.getSeconds() * 1000 + date.getMilliseconds()
   }
 
   this.get = function (key) {
@@ -25,9 +29,8 @@ function CacheMemory (initTime) {
   }
 
   this.store = function (key, el) {
-    const date = new Date()
     this.memory[key] = {
-      sec: date.getSeconds() * 1000 + date.getMilliseconds(),
+      sec: getTime(),
       el
     }
   }
@@ -39,20 +42,26 @@ function CacheMemory (initTime) {
 
 function Cache () {
 
-  let date = new Date()
-  let init = date.getSeconds() * 1000 + date.getMilliseconds()
-  this.firstMemory = new CacheMemory(init)
-  this.secondMemory = new CacheMemory(init + 1000)
-  this.thirdMemory = new CacheMemory(init + 2000)
+  let time = getTime()
+  this.firstMemory = new CacheMemory(time)
+  this.secondMemory = new CacheMemory(time + 1000)
+  this.thirdMemory = new CacheMemory(time + 2000)
+
+  function getTime () {
+    let date = new Date()
+    return date.getHours() * 60 * 60 * 1000 + date.getSeconds() * 1000 + date.getMilliseconds()
+  }
 
   this.get = function (key) {
-    const date = new Date()
-    const c = date.getSeconds() * 1000 + date.getMilliseconds()
+    console.log('   CACHE')
+    const c = getTime()
     const fInit = this.firstMemory.getInitTime()
     const sInit = this.secondMemory.getInitTime()
     if (c <= fInit + 1000) {   // 0,6
+      console.log(`   - Cache: first condition, current: ${c}, fInit: ${fInit}`)
       return (this.firstMemory.get(key) || {}).el
     } else if (c > fInit + 1000 && c < sInit + 1000) { // 1.6. Si el elemento fue storeado en 0.9 lo devuelve si fue en 0.3 no
+      console.log(`   - Cache: second condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       const r = this.secondMemory.get(key)
       if (r && c - r.sec < 1000) {
         return r.el
@@ -60,6 +69,7 @@ function Cache () {
         return null
       }
     } else if (c > sInit + 1000 && c < sInit + 2000) { // 2.5
+      console.log(`   - Cache: third condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       this._next()
       const r = this.secondMemory.get(key)
       if (r && c - r.sec < 1000) {
@@ -68,27 +78,32 @@ function Cache () {
         return null
       }
     } else if (c > sInit + 2000) { // 4.5
+      console.log(`   - Cache: fourth condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       this._bigNext(c)
       return null
     }
   }
 
   this.store = function (key, element) {
-    const c = new Date().getSeconds() * 1000 + date.getMilliseconds()
+    const c = getTime()
     const fInit = this.firstMemory.getInitTime()
     const sInit = this.secondMemory.getInitTime()
 
     if (c <= fInit + 1000) {
+      console.log(`   - STORE: first condition, current: ${c}, fInit: ${fInit}`)
       this.firstMemory.store(key, element)
       this.secondMemory.store(key, element)
     } else if (c > fInit + 1000 && c < sInit + 1000) { // 1.5
+      console.log(`   - STORE: second condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       this.secondMemory.store(key, element)
       this.thirdMemory.store(key, element)
     } else if (c > sInit + 1000 && c < sInit + 2000) { // 2.5
+      console.log(`   - STORE: third condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       this._next()
       this.secondMemory.store(key, element)
       this.thirdMemory.store(key, element)
     } else if (c > sInit + 2000) { // 4.5
+      console.log(`   - STORE: fourth condition, current: ${c}, fInit: ${fInit}, sInit: ${sInit}`)
       this._bigNext(c)
       this.firstMemory.store(key, element)
       this.secondMemory.store(key, element)
@@ -96,17 +111,29 @@ function Cache () {
   }
 
   this._next = function () {
+    console.log('_NEXT')
     this.firstMemory = this.secondMemory
     this.secondMemory = this.thirdMemory
     this.thirdMemory = new CacheMemory()
+    console.log(this.expose())
   }
 
   this._bigNext = function (c) {
+    console.log('_BIG_NEXT')
     this.firstMemory = new CacheMemory(c)
     this.secondMemory = new CacheMemory(c + 1000)
     this.thirdMemory = new CacheMemory(c + 2000)
+    console.log(this.expose())
   }
 
+
+  this.expose = function () {
+    return {
+      firstMemory: this.firstMemory.memory,
+      secondMemory: this.secondMemory.memory,
+      thirdMemory: this.thirdMemory.memory,
+    }
+  }
 }
 
 function Service (source, cache) {
@@ -114,8 +141,10 @@ function Service (source, cache) {
   this.cacheMemory = cache
 
   this.get = function (key) {
+    console.log('GET')
     let el = this.cacheMemory.get(key)
     if (!el) {
+      console.log('   NOT IN CACHE GO TO SOURCE')
       el = source.get(key)
       if (el) {
         this.cacheMemory.store(el.id, el)
@@ -124,6 +153,10 @@ function Service (source, cache) {
       }
     }
     return el
+  }
+
+  this.cacheInfo = function() {
+    return this.cacheMemory.expose()
   }
 }
 
@@ -141,9 +174,46 @@ function Source () {
   }
 
   this.get = function (key) {
-    console.log('Retrieved from Source')
     return this.elements[key]
   }
 }
 
+const log = d => console.log(d)
+
+const c = d => console.log(`   Element: ${JSON.stringify(d)}`)
+
 const service = new Service(new Source(), new Cache())
+
+
+c(service.get(1))
+
+setTimeout(function(){
+  c(service.get(2))
+}, 1200)
+
+setTimeout(function(){
+  c(service.get(2))
+}, 1700)
+
+setTimeout(function(){
+  c(service.get(3))
+}, 2700)
+
+setTimeout(function(){
+  c(service.get(4))
+}, 3000)
+
+setTimeout(function(){
+  c(service.get(5))
+}, 5000)
+
+setTimeout(function(){
+  c(service.get(6))
+}, 8200)
+
+setTimeout(function(){
+  log('---------------- FINAL STATE ----------------')
+  log(service.cacheInfo())
+}, 8500)
+
+
