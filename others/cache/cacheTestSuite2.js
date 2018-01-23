@@ -20,7 +20,7 @@ import service from './cache'
       NOT IN CACHE GO TO SOURCE
       - STORE: second condition, current: 68458419, fInit: 68457212, sInit: 68458212
       Element: {"id":2,"content":"Hola 2"}
- * 
+ *
  */
 
 const log = d => console.log(d)
