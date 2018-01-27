@@ -1,5 +1,5 @@
 import service from './cache'
-
+second
 /**
  * Bug on suite 2. On this case the service should only load the value from source one time but:
  *

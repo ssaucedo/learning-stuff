@@ -1,6 +1,4 @@
 
-
-
 ### Books
 
 [Thinking In Java](https://sophia.javeriana.edu.co/~cbustaca/docencia/POO-2016-01/documentos/Thinking_in_Java_4th_edition.pdf)
@@ -40,6 +38,42 @@ Runnable -> void
 Callable -> Future
 
 
+#### Resolving shared resource contention
+ 
+ For concurrency to work you need some way to prevent two tasks from accessing the same resource, at least during
+ critical periods. Preventing this kind of collision is simply a matter of putting a
+ lock on a resource when one task is using it.
+ The first task that accesses a resource must lock it, and then the other tasks
+ cannot access that resource until it is unlocked
+ To solve the problem of thread collision, virtually all concurrency schemes serialize access to
+ shared resources. This means that only one task at a time is allowed to access the shared
+ resource. This is ordinarily accomplished by putting a clause around a piece of code that only
+ allows one task at a time to pass through that piece of code. Because this clause produces
+ mutual exclusion, a common name for such a mechanism is mutex. 
+ 
+ To prevent collisions over resources, Java has built-in support in the form of the
+ **synchronized** keyword. When a task wishes to execute a piece of code guarded by the
+ synchronized keyword, it checks to see if the lock is available, then acquires it, executes the
+ code, and releases it. 
+
+##### Synchronized methods:
+ 
+ All objects automatically contain a single lock (also referred to as a monitor). When you call
+ any synchronized method, that object is locked and no other synchronized method of
+ that object can be called until the first one finishes and releases the lock. 
+ 
+ Note that it’s especially important to make fields private when working with concurrency;
+ otherwise the synchronized keyword cannot prevent another task from accessing a field
+ directly, and thus producing collisions. 
+
+##### Synchronized Statements
+
+```
+synchronized(syncObject) {
+ // This code can be accessed by only one task at a time
+} 
+```
+
 #### Atomicity and volatility 
 
 *An atomic operation is one that cannot be
@@ -64,18 +98,8 @@ This is true even if local caches are involved—volatile fields are immediately
 to main memory, and reads occur from main memory.* 
  
 
-
-#### Synchronized block
-
-```
-synchronized(syncObject) {
- // This code can be accessed by only one task at a time
-} 
-```
-
 *The lock must be acquired on syncObject. If some other task already has this lock, then the critical section cannot be
 entered until the lock is released.*
-
 
 #### Thread local storage:
 
@@ -93,6 +117,11 @@ different pieces of storage for x. Basically, they allow you to associate state 
   interest may have happened—does the task wake up and check for changes. Thus, wait( )
   provides a way to synchronize activities between tasks.*
   
+#### Joining a thread
+*One thread may call join( ) on another thread to wait for the second thread to complete
+before proceeding*
+
+
 #### Lock and Condition
 
 [Conditions docs](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/Condition.html)
@@ -101,7 +130,6 @@ Condition factors out the Object monitor methods (wait, notify and notifyAll)
 into distinct objects to give the effect of having multiple wait-sets per object,
 by combining them with the use of arbitrary Lock implementations.
 **Where a Lock replaces the use of synchronized methods and statements, a Condition replaces the use of the Object monitor methods.**
-
 
 ```
 
@@ -113,13 +141,16 @@ by combining them with the use of arbitrary Lock implementations.
 
 ```
 
+
 #### Producer-consumers and queues
 
+[Concurrency patterns](https://en.wikipedia.org/wiki/Concurrency_pattern)
+
 *The wait( ) and notifyAll( ) methods solve the problem of task cooperation in a rather low
-level fashion, handshaking every interaction. In many cases, you can move up a level of
-abstraction and solve task cooperation problems using a **synchronized queue**, which only
-allows one task at a time to insert or remove an element. This is provided for you in the
-java.util.concurrent.BlockingQueue interface, which has a number of standard
+level fashion, handshaking every interaction.
+In many cases, you can move up a level of abstraction and solve task cooperation problems
+using a **synchronized queue**, which only allows one task at a time to insert or remove an element.
+This is provided for you in the java.util.concurrent.BlockingQueue interface, which has a number of standard
 implementations. You’ll usually use the LinkedBlockingQueue, which is an unbounded
 queue; the ArrayBlockingQueue has a fixed size, so you can only put so many elements in
 it before it blocks.
@@ -127,3 +158,62 @@ These queues also suspend a consumer task if that task tries to get an object fr
 and the queue is empty, and resume when more elements become available. Blocking queues
 can solve a remarkable number of problems in a much simpler and more reliable fashion
 than wait( ) and notifyAll( ).*
+
+- BlockingQueue
+      - take
+      - put
+
+- PipeWriter
+- PipeReader
+
+      - write
+      - read  // Blocks until characters are there.
+
+- Semaphore
+    A normal lock (from concurrent.locks or the built-in synchronized lock) only allows one
+    task at a time to access a resource.
+    A counting semaphore allows n tasks to access the resource at the same time.
+    You can also think of a semaphore as handing out "permits" to use a resource, although no actual permit objects are used.
+
+
+Java has an awesome api for Semaphores:
+     constructor: new Semaphore(size, true);
+     semaphore.acquire(); // Acquires a permit from this semaphore, blocking until one is available, or the thread is interrupted.
+     semaphore.release(); // Releases a permit, returning it to the semaphore.
+     availablePermits(); // return the number of permits.
+     tryAcquire; // if possible acquires a permit and return true else it returns false an continues execution.
+
+- Exchanger
+
+An Exchanger is a barrier that swaps objects between two tasks. When the tasks enter the
+barrier, they have one object, and when they leave, they have the object that was formerly
+held by the other task. Exchangers are typically used when one task is creating objects that
+are expensive to produce and another task is consuming those objects; this way, more objects
+can be created at the same time as they are being consumed. 
+
+When you call the Exchanger.exchange( ) method, it blocks until the partner task calls its exchange()
+method, and when both exchange( ) methods have completed, the List<T> has been swapped.
+ 
+ 
+The ExchangerProducer fills a List, then swaps the full list for the empty one that the ExchangerConsumer hands it.
+Because of the Exchanger, the filling of one list and consuming of the other list can happen simultaneously.
+ 
+ 
+ Notes:
+
+[SyncQueue vs Exchanger](https://stackoverflow.com/questions/9735709/synchronousqueue-vs-exchanger)
+
+[Exchanger and GC](http://vanillajava.blogspot.com.ar/2011/09/exchange-and-gc-less-java.html?z=)
+
+
+
+
+
+
+
+
+
+
+
+
+
