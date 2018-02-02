@@ -1,1 +1,8 @@
 
+
+
+https://developers.google.com/web/fundamentals/performance/rendering/?hl=es-419
+
+https://redis.io/documentation
+
+http://www.enterpriseintegrationpatterns.com/patterns/messaging/index.html

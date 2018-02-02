@@ -5,8 +5,12 @@
 
 [Concurrent Programming in Java](https://pdfs.semanticscholar.org/2565/03a8676b78ecf8745fa88940eb92416b9fa7.pdf)
 
-### Basics
+[Java Concurrency In Practice](http://www.periodicooficial.oaxaca.gob.mx/files/2011/05/EXT02-2011-05-19.pdf)
 
+[Java performance](http://1.droppdf.com/files/iTkkV/oreilly-java-performance-the-definitive-guide-2014.pdf)
+
+
+### Basics
 
 ### Thread states:
 
@@ -200,6 +204,8 @@ Because of the Exchanger, the filling of one list and consuming of the other lis
  
  
  Notes:
+ 
+check CountDownLatch and Phaser patterns (barriers)
 
 [SyncQueue vs Exchanger](https://stackoverflow.com/questions/9735709/synchronousqueue-vs-exchanger)
 

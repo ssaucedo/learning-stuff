@@ -18,7 +18,7 @@
 
  Consequences
   The Command pattern has the following consequences:
-    1. Command decouples the object that invokesthe operation from the one that
+    1. Command decouples the object that invokes the operation from the one that
        knows how to perform it.
     2. Commands are first-class objects. They can be manipulated and extended
        like any other object.
